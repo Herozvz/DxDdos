@@ -22,25 +22,25 @@ Markdown
 
 1.  **Склонируйте репозиторий:**
     ```bash
-    git clone [https://github.com/herozvz/your-repo-name.git](https://github.com/herozvz/your-repo-name.git)
-    cd your-repo-name
+    git clone https://github.com/Herozvz/DxDdos.git
+    cd DxDdos
     ```
 
 2.  **Требования:**
-    Скрипт использует стандартные библиотеки Python (`asyncio`, `ssl`, `urllib`), поэтому установка дополнительных `pip` зависимостей не требуется. Необходим Python версии **3.7 или выше**.
+    Скрипт использует стандартные библиотеки Python (`asyncio`, `ssl`, `urllib`) Необходим Python версии **3.7 или выше**.
 
 ## 🚀 Запуск
 
 Запустите скрипт через терминал:
 
 ```bash
-python main.py
+python3 DoSAtt.py
 
 Инструкция по настройке:
 
-    Target URL: Введите полный адрес цели (например, https://example.com).
+    Target URL: Введите полный адрес цели (https://blablabla.com).
 
-    Concurrent Connections: Укажите количество одновременных потоков (например, 1000, 5000 или 10000).
+    Concurrent Connections: Укажите количество одновременных потоков (например, 1000, 5000 или 10000) эффективности при минимуме.
 
 Чтобы остановить процесс, нажмите Ctrl + C.
 📊 Технические детали
