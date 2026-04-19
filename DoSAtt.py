@@ -81,12 +81,12 @@ COMMON_PATHS = [
 ]
 
 def generate_random_string(length):
-    """توليد سلسلة عشوائية من الأحرف والأرقام بطول محدد."""
+    """Сгенерировать случайную последовательность букв и цифр заданной длины.."""
     chars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     return ''.join(random.choice(chars) for _ in range(length))
 
 def generate_spoofed_ip():
-    """توليد عنوان IPv4 عشوائي (مزيف) لاستخدامه في رؤوس X-Forwarded-For."""
+    """Сгенерировать случайный (поддельный) IPv4-адрес для использования в заголовках. X-Forwarded-For."""
     return f"{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}"
 
 async def send_raw_http_request(writer, host, path, method, post_data=None):
